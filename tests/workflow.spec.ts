@@ -1,5 +1,13 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+const MOBILE_BREAKPOINT = 820;
+
+async function openInspectorIfMobile(page: Page) {
+  if ((page.viewportSize()?.width ?? 0) <= MOBILE_BREAKPOINT) {
+    await page.getByRole("button", { name: "Inspector" }).click();
+  }
+}
 
 test("renders an accessible work surface without viewport overflow", async ({ page }, testInfo) => {
   await page.goto("./");
@@ -8,6 +16,16 @@ test("renders an accessible work surface without viewport overflow", async ({ pa
   expect(accessibility.violations).toEqual([]);
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(overflow, `${testInfo.project.name} body should not overflow`).toBe(false);
+});
+
+test("short desktop viewports keep the run and status areas visible", async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === "mobile", "Desktop height regression only");
+  await page.setViewportSize({ width: 1024, height: 550 });
+  await page.goto("./");
+  await expect(page.getByText("Run trace", { exact: true })).toBeVisible();
+  await expect(page.getByText("Synthetic data")).toBeVisible();
+  const statusBottom = await page.locator(".statusbar").evaluate((element) => element.getBoundingClientRect().bottom);
+  expect(statusBottom).toBeLessThanOrEqual(550);
 });
 
 test("invoice mismatch pauses for review and completes only after approval", async ({ page }) => {
@@ -30,9 +48,7 @@ test("clean invoice takes the automatic branch", async ({ page }) => {
   await expect(page.getByText("Draft synced and owner notified")).toBeVisible();
   await expect(page.getByText("Review invoice 1048")).toBeHidden();
   await page.getByRole("button", { name: /Seven fields extracted/ }).click();
-  if ((page.viewportSize()?.width ?? 0) <= 820) {
-    await page.getByRole("button", { name: "Inspector" }).click();
-  }
+  await openInspectorIfMobile(page);
   await expect(page.locator("[data-inspector-title]")).toHaveText("Extract invoice fields");
 });
 
@@ -50,11 +66,14 @@ test("permission failure is explicit and recoverable", async ({ page }) => {
 test("route policy can be inspected and changed", async ({ page }) => {
   await page.goto("./");
   await page.getByRole("button", { name: /Route by confidence/ }).click();
-  if ((page.viewportSize()?.width ?? 0) <= 820) {
-    await page.getByRole("button", { name: "Inspector" }).click();
-  }
+  await openInspectorIfMobile(page);
   const threshold = page.getByLabel("Review threshold");
   await expect(threshold).toBeVisible();
+  await expect(threshold).toHaveAttribute("min", "75");
+  expect(await page.locator(".range-labels span").allTextContents()).toEqual(["More automation", "More review"]);
+  await page.getByRole("button", { name: "Run workflow" }).click();
+  await expect(page.locator("[data-run-id]")).toHaveText("RUN-001");
+  await openInspectorIfMobile(page);
   await threshold.fill("92");
   await expect(page.locator("[data-threshold-value]")).toHaveText("0.92");
   await expect(page.locator("[data-run-id]")).toHaveText("Not started");
@@ -62,9 +81,17 @@ test("route policy can be inspected and changed", async ({ page }) => {
   await expect(page.getByText("Confidence 0.71 is below the 0.92 policy")).toBeVisible();
 });
 
+test("instruction edits update the character budget", async ({ page }) => {
+  await page.goto("./");
+  await openInspectorIfMobile(page);
+  await page.getByLabel("Instruction").fill("Return typed evidence.");
+  await expect(page.locator("[data-instruction-count]")).toHaveText("22 / 500");
+  await expect(page.locator("[data-run-id]")).toHaveText("Not started");
+});
+
 test("workflow library search filters public examples", async ({ page }) => {
   await page.goto("./");
-  if ((page.viewportSize()?.width ?? 0) <= 820) test.skip();
+  if ((page.viewportSize()?.width ?? 0) <= MOBILE_BREAKPOINT) test.skip();
   await page.getByPlaceholder("Search workflows").fill("refund");
   await expect(page.getByRole("button", { name: /Refund evidence check/ })).toBeVisible();
   await expect(page.getByRole("button", { name: /Invoice exception review/ })).toBeHidden();

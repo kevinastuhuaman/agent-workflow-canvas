@@ -43,13 +43,14 @@ const nodeIcons = {
 
 const title = "Agent Workflow Canvas | Kevin Astuhuaman";
 const description = "An interactive enterprise agent workflow builder with human approval, recovery, and auditable execution.";
+const defaultInstruction = "Extract supplier, invoice number, dates, currency, line totals, tax, and purchase-order reference. Return evidence for every field.";
 ---
 
 <!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="author" content="Kevin Astuhuaman" />
@@ -213,15 +214,15 @@ const description = "An interactive enterprise agent workflow builder with human
           </div>
 
           <div class="inspector-section agent-settings" data-agent-settings>
-            <div class="section-title"><label for="step-instruction">Instruction</label><button class="icon-button" type="button" aria-label="Insert variable" title="Insert variable"><Braces size={15} /></button></div>
-            <textarea id="step-instruction" rows="5" data-instruction>Extract supplier, invoice number, dates, currency, line totals, tax, and purchase-order reference. Return evidence for every field.</textarea>
-            <div class="field-footer"><span>Model output must match the invoice schema.</span><span>186 / 500</span></div>
+            <div class="section-title"><label for="step-instruction">Instruction</label><button class="icon-button" type="button" aria-label="Insert variable" title="Insert variable" disabled><Braces size={15} /></button></div>
+            <textarea id="step-instruction" rows="5" maxlength="500" data-instruction>{defaultInstruction}</textarea>
+            <div class="field-footer"><span>Model output must match the invoice schema.</span><span data-instruction-count>{defaultInstruction.length} / 500</span></div>
           </div>
 
           <div class="inspector-section threshold-settings" data-threshold-settings hidden>
             <div class="section-title"><label for="threshold">Review threshold</label><strong data-threshold-value>0.85</strong></div>
-            <input id="threshold" type="range" min="60" max="92" value="85" data-threshold />
-            <div class="range-labels"><span>More review</span><span>More automation</span></div>
+            <input id="threshold" type="range" min="75" max="92" value="85" data-threshold />
+            <div class="range-labels"><span>More automation</span><span>More review</span></div>
           </div>
 
           <div class="inspector-section">
@@ -538,7 +539,12 @@ const description = "An interactive enterprise agent workflow builder with human
         resetRun();
       });
 
-      app.querySelector("[data-instruction]")?.addEventListener("input", resetRun);
+      const instruction = app.querySelector<HTMLTextAreaElement>("[data-instruction]");
+      instruction?.addEventListener("input", () => {
+        const count = app.querySelector("[data-instruction-count]");
+        if (count) count.textContent = `${instruction.value.length} / 500`;
+        resetRun();
+      });
       app.querySelector("[data-failure-behavior]")?.addEventListener("change", resetRun);
 
       const librarySearch = app.querySelector<HTMLInputElement>("[data-library-search]");

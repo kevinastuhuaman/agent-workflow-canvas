@@ -1,5 +1,6 @@
 :root {
   color-scheme: light;
+
   --ink: #17201d;
   --muted: #59645e;
   --line: #dce3df;
@@ -71,6 +72,7 @@ a:focus-visible {
   margin: -1px;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
@@ -80,7 +82,6 @@ a:focus-visible {
   grid-template-rows: 58px minmax(0, 1fr) 28px;
   width: 100%;
   height: 100dvh;
-  min-height: 660px;
   overflow: hidden;
 }
 
@@ -272,7 +273,7 @@ a:focus-visible {
 .run-button svg {
   width: 16px;
   height: 16px;
-  fill: currentColor;
+  fill: currentcolor;
 }
 
 .mobile-tabs {

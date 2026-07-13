@@ -42,6 +42,7 @@ This is an original, public-safe prototype. It contains synthetic invoice data a
 
 ```bash
 npm install
+npx playwright install --with-deps chromium
 npm test
 npm run dev
 ```
