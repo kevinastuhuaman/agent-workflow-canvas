@@ -1,0 +1,563 @@
+---
+import {
+  Activity,
+  ArrowRight,
+  Bot,
+  Braces,
+  Check,
+  ChevronDown,
+  CircleAlert,
+  Clock3,
+  Database,
+  FileInput,
+  GitBranch,
+  History,
+  Ellipsis,
+  ListChecks,
+  LockKeyhole,
+  Maximize2,
+  Play,
+  Plus,
+  Redo2,
+  RotateCcw,
+  Search,
+  Settings2,
+  ShieldCheck,
+  Undo2,
+  UserCheck,
+  X,
+  ZoomIn,
+  ZoomOut,
+} from "@lucide/astro";
+import { library, nodes, scenarios } from "../data/workflows";
+import "../styles/global.css";
+
+const nodeIcons = {
+  trigger: FileInput,
+  agent: Bot,
+  rule: ListChecks,
+  branch: GitBranch,
+  approval: UserCheck,
+  action: Database,
+};
+
+const title = "Agent Workflow Canvas | Kevin Astuhuaman";
+const description = "An interactive enterprise agent workflow builder with human approval, recovery, and auditable execution.";
+const defaultInstruction = "Extract supplier, invoice number, dates, currency, line totals, tax, and purchase-order reference. Return evidence for every field.";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="Kevin Astuhuaman" />
+    <meta name="keywords" content="enterprise AI, agent workflows, human in the loop, AI product management, workflow automation, agent reliability" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="https://kevinastuhuaman.github.io/agent-workflow-canvas/" />
+    <link rel="alternate" type="text/plain" href="https://kevinastuhuaman.github.io/agent-workflow-canvas/llms.txt" title="LLM brief" />
+    <link rel="alternate" type="application/json" href="https://kevinastuhuaman.github.io/agent-workflow-canvas/project.json" title="Project record" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://kevinastuhuaman.github.io/agent-workflow-canvas/" />
+    <meta property="og:title" content="Agent Workflow Canvas" />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content="https://kevinastuhuaman.github.io/agent-workflow-canvas/social-preview.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Agent Workflow Canvas showing an enterprise workflow, execution trace, and finance approval" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "SoftwareSourceCode",
+      name: "Agent Workflow Canvas",
+      description,
+      codeRepository: "https://github.com/kevinastuhuaman/agent-workflow-canvas",
+      author: { "@type": "Person", name: "Kevin Astuhuaman", url: "https://portfolio.kevinastuhuaman.com" },
+      programmingLanguage: ["TypeScript", "Astro"],
+      license: "https://opensource.org/license/mit",
+    })}></script>
+  </head>
+  <body>
+    <main class="app-shell" data-workflow-app data-scenario="mismatch" data-mode="build">
+      <h1 class="sr-only">Agent Workflow Canvas</h1>
+      <header class="topbar">
+        <div class="product-lockup">
+          <div class="product-mark" aria-hidden="true"><Braces size={18} /></div>
+          <div>
+            <strong>Agent Workflow Canvas</strong>
+            <span>Public-safe prototype</span>
+          </div>
+        </div>
+
+        <div class="workflow-name">
+          <span class="save-state"><Check size={13} /> Saved</span>
+          <strong>Invoice exception review</strong>
+          <button class="icon-button" type="button" aria-label="More workflow actions" title="More workflow actions" disabled><Ellipsis size={18} /></button>
+        </div>
+
+        <div class="topbar-actions">
+          <div class="history-actions" aria-label="Edit history">
+            <button class="icon-button" type="button" aria-label="Undo" title="Undo" disabled><Undo2 size={17} /></button>
+            <button class="icon-button" type="button" aria-label="Redo" title="Redo" disabled><Redo2 size={17} /></button>
+          </div>
+          <div class="mode-control" aria-label="Workspace mode">
+            <button type="button" data-mode-button="build" aria-pressed="true">Build</button>
+            <button type="button" data-mode-button="run" aria-pressed="false">Run</button>
+          </div>
+          <button class="run-button" type="button" data-run aria-label="Run workflow"><Play size={16} fill="currentColor" /><span data-run-label>Run</span></button>
+        </div>
+      </header>
+
+      <nav class="mobile-tabs" aria-label="Workflow workspace views">
+        <button type="button" data-mobile-view="canvas" aria-pressed="true">Canvas</button>
+        <button type="button" data-mobile-view="inspector" aria-pressed="false">Inspector</button>
+        <button type="button" data-mobile-view="run" aria-pressed="false">Run <span data-run-count>0</span></button>
+      </nav>
+
+      <div class="workspace">
+        <aside class="library-panel" aria-label="Workflow library">
+          <div class="panel-heading">
+            <div><span>Workspace</span><strong>Finance operations</strong></div>
+            <button class="icon-button" type="button" aria-label="Add workflow" title="Add workflow" disabled><Plus size={17} /></button>
+          </div>
+          <label class="search-field">
+            <Search size={15} aria-hidden="true" />
+            <span class="sr-only">Search workflows</span>
+            <input type="search" placeholder="Search workflows" data-library-search />
+          </label>
+          <div class="library-list">
+            {library.map((item) => (
+              <button type="button" class:list={["library-item", { active: item.active }]} aria-current={item.active ? "page" : undefined} data-library-item disabled={!item.active}>
+                <span class="library-icon"><GitBranch size={15} /></span>
+                <span><strong>{item.name}</strong><small>{item.meta}</small></span>
+                {item.active && <ArrowRight size={14} />}
+              </button>
+            ))}
+          </div>
+          <div class="library-footer">
+            <ShieldCheck size={16} />
+            <span><strong>Approval policy active</strong><small>Consequential actions require an owner.</small></span>
+          </div>
+        </aside>
+
+        <section class="canvas-panel" data-panel="canvas" aria-label="Workflow canvas">
+          <div class="canvas-toolbar">
+            <label class="scenario-select">
+              <span>Run scenario</span>
+              <select data-scenario-select aria-label="Run scenario">
+                {scenarios.map((scenario) => <option value={scenario.id}>{scenario.label}</option>)}
+              </select>
+              <ChevronDown size={14} aria-hidden="true" />
+            </label>
+            <span class="scenario-note" data-scenario-note>Requires finance approval</span>
+            <div class="canvas-tools">
+              <button class="icon-button" type="button" aria-label="Zoom out" title="Zoom out" disabled><ZoomOut size={16} /></button>
+              <span>100%</span>
+              <button class="icon-button" type="button" aria-label="Zoom in" title="Zoom in" disabled><ZoomIn size={16} /></button>
+              <button class="icon-button" type="button" aria-label="Fit workflow" title="Fit workflow" disabled><Maximize2 size={16} /></button>
+            </div>
+          </div>
+
+          <div class="canvas-scroll">
+            <div class="workflow-diagram" role="group" aria-label="Invoice exception workflow">
+              <svg class="connections" viewBox="0 0 1400 560" preserveAspectRatio="none" aria-hidden="true">
+                <defs>
+                  <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" /></marker>
+                </defs>
+                <path data-edge="intake-extract" d="M200 280 H240" />
+                <path data-edge="extract-risk" d="M420 280 H460" />
+                <path data-edge="risk-route" d="M640 280 H680" />
+                <path data-edge="route-post" d="M860 280 C900 280 890 145 930 145" />
+                <path data-edge="route-review" d="M860 280 C900 280 890 415 930 415" />
+                <path data-edge="post-sync" d="M1110 145 C1150 145 1150 280 1190 280" />
+                <path data-edge="review-sync" d="M1110 415 C1150 415 1150 280 1190 280" />
+              </svg>
+
+              {nodes.map((node) => {
+                const Icon = nodeIcons[node.kind];
+                return (
+                  <button
+                    type="button"
+                    class={`workflow-node node-${node.kind}`}
+                    data-node={node.id}
+                    data-state="idle"
+                    aria-pressed={node.id === "extract" ? "true" : "false"}
+                  >
+                    <span class="node-status" aria-hidden="true"><Clock3 size={12} /></span>
+                    <span class="node-icon"><Icon size={18} /></span>
+                    <span class="node-copy"><small>{node.eyebrow}</small><strong>{node.title}</strong><span>{node.tool}</span></span>
+                    <span class="node-port" aria-hidden="true"></span>
+                  </button>
+                );
+              })}
+
+              <span class="branch-label branch-auto">Confidence at least <span data-threshold-label>0.85</span></span>
+              <span class="branch-label branch-review">Below threshold</span>
+              <button class="add-step" type="button" aria-label="Add workflow step" title="Add workflow step" disabled><Plus size={16} /></button>
+            </div>
+          </div>
+        </section>
+
+        <aside class="inspector-panel" data-panel="inspector" aria-label="Step inspector">
+          <div class="inspector-header">
+            <div class="inspector-icon"><Settings2 size={18} /></div>
+            <div><span data-inspector-eyebrow>AI step</span><strong data-inspector-title>Extract invoice fields</strong></div>
+            <button class="icon-button mobile-only" type="button" aria-label="Close inspector" title="Close inspector" data-mobile-view="canvas"><X size={17} /></button>
+          </div>
+
+          <div class="inspector-section">
+            <label class="field-label" for="step-name">Step name</label>
+            <input id="step-name" class="text-input" value="Extract invoice fields" data-step-name />
+          </div>
+
+          <div class="inspector-section agent-settings" data-agent-settings>
+            <div class="section-title"><label for="step-instruction">Instruction</label><button class="icon-button" type="button" aria-label="Insert variable" title="Insert variable" disabled><Braces size={15} /></button></div>
+            <textarea id="step-instruction" rows="5" maxlength="500" data-instruction>{defaultInstruction}</textarea>
+            <div class="field-footer"><span>Model output must match the invoice schema.</span><span data-instruction-count>{defaultInstruction.length} / 500</span></div>
+          </div>
+
+          <div class="inspector-section threshold-settings" data-threshold-settings hidden>
+            <div class="section-title"><label for="threshold">Review threshold</label><strong data-threshold-value>0.85</strong></div>
+            <input id="threshold" type="range" min="75" max="92" value="85" data-threshold />
+            <div class="range-labels"><span>More automation</span><span>More review</span></div>
+          </div>
+
+          <div class="inspector-section">
+            <label class="field-label" for="failure-behavior">Failure behavior</label>
+            <div class="select-control">
+              <RotateCcw size={15} aria-hidden="true" />
+              <select id="failure-behavior" data-failure-behavior>
+                <option value="retry">Retry, then route to review</option>
+                <option value="review">Route to review immediately</option>
+                <option value="stop">Stop and notify the owner</option>
+              </select>
+              <ChevronDown size={15} aria-hidden="true" />
+            </div>
+            <small class="failure-help">The retry policy uses the same committed input.</small>
+          </div>
+
+          <div class="policy-callout">
+            <LockKeyhole size={17} />
+            <span><strong>Action boundary</strong><small>Payment release is outside this workflow. ERP commits require a run-specific approval.</small></span>
+          </div>
+        </aside>
+
+        <section class="run-panel" data-panel="run" aria-label="Run trace" aria-live="polite">
+          <div class="run-header">
+            <div><Activity size={17} /><span><strong>Run trace</strong><small data-run-subtitle>Ready for a synthetic run</small></span></div>
+            <div class="run-header-actions">
+              <span class="run-id" data-run-id>Not started</span>
+              <button class="icon-button" type="button" aria-label="Clear run" title="Clear run" data-clear-run><RotateCcw size={16} /></button>
+            </div>
+          </div>
+          <div class="trace-empty" data-trace-empty>
+            <History size={23} />
+            <span><strong>No execution yet</strong><small>Run the selected synthetic scenario to inspect events.</small></span>
+          </div>
+          <ol class="trace-list" data-trace-list hidden></ol>
+          <div class="approval-drawer" data-approval hidden>
+            <div class="approval-summary">
+              <span class="approval-icon"><CircleAlert size={18} /></span>
+              <span><strong>Review invoice 1048</strong><small>Total is $1,240 above the purchase order. Evidence is attached to both fields.</small></span>
+            </div>
+            <div class="approval-actions">
+              <button type="button" class="secondary-button" data-reject><X size={15} /> Reject</button>
+              <button type="button" class="approve-button" data-approve><Check size={15} /> Approve draft</button>
+            </div>
+          </div>
+          <div class="recovery-drawer" data-recovery hidden>
+            <div><LockKeyhole size={18} /><span><strong>ERP permission expired</strong><small>No data was committed. A scoped connection is ready to request.</small></span></div>
+            <button type="button" class="approve-button" data-retry><RotateCcw size={15} /> Retry with scoped access</button>
+          </div>
+        </section>
+      </div>
+
+      <footer class="statusbar">
+        <span><ShieldCheck size={14} /> Synthetic data</span>
+        <span><Activity size={14} /> Deterministic simulation</span>
+        <a href="https://github.com/kevinastuhuaman/agent-workflow-canvas">Source</a>
+        <a href="https://portfolio.kevinastuhuaman.com">Kevin Astuhuaman</a>
+      </footer>
+    </main>
+
+    <script>
+      import { nodes, scenarios } from "../data/workflows";
+
+      type RunState = "idle" | "running" | "complete" | "review" | "failed";
+
+      const app = document.querySelector<HTMLElement>("[data-workflow-app]")!;
+
+      const nodeButtons = [...app.querySelectorAll("[data-node]")];
+      const traceList = app.querySelector<HTMLOListElement>("[data-trace-list]");
+      const traceEmpty = app.querySelector<HTMLElement>("[data-trace-empty]");
+      const approval = app.querySelector<HTMLElement>("[data-approval]");
+      const recovery = app.querySelector<HTMLElement>("[data-recovery]");
+      const runButton = app.querySelector<HTMLButtonElement>("[data-run]");
+      const scenarioSelect = app.querySelector<HTMLSelectElement>("[data-scenario-select]");
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const delay = reducedMotion ? 15 : 360;
+      let runSequence = 0;
+      let activeRun = 0;
+      let selectedNode = "extract";
+      const customTitles = new Map<string, string>();
+
+      const iconForState: Record<string, string> = {
+        idle: "-",
+        running: "...",
+        complete: "OK",
+        review: "!",
+        failed: "X",
+      };
+
+      const scenarioEvents = {
+        mismatch: [
+          ["intake", "Invoice 1048 received", "PDF and sender metadata committed"],
+          ["extract", "Seven fields extracted", "Evidence linked to every returned value"],
+          ["risk", "Purchase-order mismatch", "Invoice total is $1,240 above PO-8821"],
+          ["route", "Routed to accountable review", "Confidence 0.71 is below the {threshold} policy"],
+          ["review", "Finance approval required", "No ERP commit can occur in this state"],
+        ],
+        clean: [
+          ["intake", "Invoice 1052 received", "PDF and sender metadata committed"],
+          ["extract", "Seven fields extracted", "Evidence linked to every returned value"],
+          ["risk", "Validation passed", "Totals and purchase order agree"],
+          ["route", "Automatic branch selected", "Confidence 0.96 meets the {threshold} policy"],
+          ["post", "ERP draft prepared", "Draft AP-2044 created without releasing funds"],
+          ["sync", "Draft synced and owner notified", "Completion event written to the audit trail"],
+        ],
+        permission: [
+          ["intake", "Invoice 1056 received", "PDF and sender metadata committed"],
+          ["extract", "Seven fields extracted", "Evidence linked to every returned value"],
+          ["risk", "Validation passed", "Totals and purchase order agree"],
+          ["route", "Automatic branch selected", "Confidence 0.93 meets the {threshold} policy"],
+          ["post", "ERP draft prepared", "Draft remains local until the connector accepts it"],
+          ["sync", "ERP permission expired", "The workflow failed closed before commit"],
+        ],
+      };
+
+      function setMode(mode: string) {
+        app.dataset.mode = mode;
+        app.querySelectorAll("[data-mode-button]").forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.getAttribute("data-mode-button") === mode));
+        });
+        if (mode === "run") setMobileView("run");
+      }
+
+      function setMobileView(view: string) {
+        app.dataset.mobileView = view;
+        app.querySelectorAll("[data-mobile-view]").forEach((button) => {
+          button.setAttribute("aria-pressed", String(button.getAttribute("data-mobile-view") === view));
+        });
+      }
+
+      function selectNode(id: string) {
+        selectedNode = id;
+        const node = nodes.find((item) => item.id === id);
+        if (!node) return;
+        nodeButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.getAttribute("data-node") === id)));
+        const title = app.querySelector("[data-inspector-title]");
+        const eyebrow = app.querySelector("[data-inspector-eyebrow]");
+        const nameInput = app.querySelector("[data-step-name]");
+        const displayTitle = customTitles.get(id) || node.title;
+        if (title) title.textContent = displayTitle;
+        if (eyebrow) eyebrow.textContent = node.eyebrow;
+        if (nameInput instanceof HTMLInputElement) nameInput.value = displayTitle;
+        const agentSettings = app.querySelector("[data-agent-settings]");
+        const thresholdSettings = app.querySelector("[data-threshold-settings]");
+        if (agentSettings instanceof HTMLElement) agentSettings.hidden = id !== "extract";
+        if (thresholdSettings instanceof HTMLElement) thresholdSettings.hidden = id !== "route";
+      }
+
+      function resetRun() {
+        activeRun += 1;
+        nodeButtons.forEach((button) => { if (button instanceof HTMLElement) button.dataset.state = "idle"; });
+        app.querySelectorAll("[data-edge]").forEach((edge) => edge.setAttribute("data-state", "idle"));
+        if (traceList) { traceList.innerHTML = ""; traceList.hidden = true; }
+        if (traceEmpty instanceof HTMLElement) traceEmpty.hidden = false;
+        if (approval instanceof HTMLElement) approval.hidden = true;
+        if (recovery instanceof HTMLElement) recovery.hidden = true;
+        if (runButton instanceof HTMLButtonElement) runButton.disabled = false;
+        const runLabel = app.querySelector("[data-run-label]");
+        if (runLabel) runLabel.textContent = "Run";
+        const subtitle = app.querySelector("[data-run-subtitle]");
+        const runId = app.querySelector("[data-run-id]");
+        const count = app.querySelector("[data-run-count]");
+        if (subtitle) subtitle.textContent = "Ready for a synthetic run";
+        if (runId) runId.textContent = "Not started";
+        if (count) count.textContent = "0";
+      }
+
+      function addTrace(nodeId: string, title: string, detail: string, state: RunState) {
+        if (!(traceList instanceof HTMLOListElement)) return;
+        traceList.hidden = false;
+        if (traceEmpty instanceof HTMLElement) traceEmpty.hidden = true;
+        const item = document.createElement("li");
+        item.dataset.state = state;
+        const control = document.createElement("button");
+        control.type = "button";
+        control.className = "trace-event";
+        control.addEventListener("click", () => selectNode(nodeId));
+        const stateMark = document.createElement("span");
+        stateMark.className = "trace-state";
+        stateMark.setAttribute("aria-hidden", "true");
+        stateMark.textContent = iconForState[state] || "-";
+        const copy = document.createElement("span");
+        const heading = document.createElement("strong");
+        const description = document.createElement("small");
+        heading.textContent = title;
+        description.textContent = detail;
+        copy.append(heading, description);
+        const time = document.createElement("time");
+        time.textContent = "now";
+        control.append(stateMark, copy, time);
+        item.append(control);
+        traceList.append(item);
+        const count = app.querySelector("[data-run-count]");
+        if (count) count.textContent = String(traceList.children.length);
+        selectNode(nodeId);
+      }
+
+      function setNodeState(id: string, state: RunState) {
+        const node = app.querySelector(`[data-node="${id}"]`);
+        if (node instanceof HTMLElement) node.dataset.state = state;
+        const edgeMap: Record<string, string> = { extract: "intake-extract", risk: "extract-risk", route: "risk-route", post: "route-post", review: "route-review", sync: app.dataset.scenario === "mismatch" ? "review-sync" : "post-sync" };
+        const edgeId = edgeMap[id];
+        if (edgeId) app.querySelector(`[data-edge="${edgeId}"]`)?.setAttribute("data-state", state === "failed" ? "failed" : "complete");
+      }
+
+      async function runWorkflow() {
+        resetRun();
+        const token = ++activeRun;
+        runSequence += 1;
+        const scenario = app.dataset.scenario || "mismatch";
+        setMode("run");
+        if (runButton instanceof HTMLButtonElement) runButton.disabled = true;
+        const runLabel = app.querySelector("[data-run-label]");
+        if (runLabel) runLabel.textContent = "Running";
+        const subtitle = app.querySelector("[data-run-subtitle]");
+        const runId = app.querySelector("[data-run-id]");
+        if (subtitle) subtitle.textContent = scenarios.find((item) => item.id === scenario)?.label || "Synthetic run";
+        if (runId) runId.textContent = `RUN-${String(runSequence).padStart(3, "0")}`;
+
+        const eventSet = scenarioEvents[scenario as keyof typeof scenarioEvents] ?? scenarioEvents.mismatch;
+        for (const [nodeId, title, detail] of eventSet) {
+          if (token !== activeRun) return;
+          setNodeState(nodeId, "running");
+          await new Promise((resolve) => window.setTimeout(resolve, delay));
+          if (token !== activeRun) return;
+          const terminal = nodeId === "review" ? "review" : scenario === "permission" && nodeId === "sync" ? "failed" : "complete";
+          setNodeState(nodeId, terminal);
+          const threshold = app.querySelector<HTMLInputElement>("[data-threshold]");
+          const thresholdValue = ((Number(threshold?.value) || 85) / 100).toFixed(2);
+          addTrace(nodeId, title, detail.replace("{threshold}", thresholdValue), terminal);
+        }
+
+        if (scenario === "mismatch") {
+          if (approval instanceof HTMLElement) approval.hidden = false;
+          if (subtitle) subtitle.textContent = "Paused for finance approval";
+          if (runLabel) runLabel.textContent = "Awaiting review";
+        } else if (scenario === "permission") {
+          if (recovery instanceof HTMLElement) recovery.hidden = false;
+          if (subtitle) subtitle.textContent = "Failed closed before ERP commit";
+          if (runLabel) runLabel.textContent = "Recovery needed";
+        } else {
+          if (subtitle) subtitle.textContent = "Completed with automatic routing";
+          if (runButton instanceof HTMLButtonElement) runButton.disabled = false;
+          if (runLabel) runLabel.textContent = "Run again";
+        }
+      }
+
+      function completeApproval(approved: boolean) {
+        if (approval instanceof HTMLElement) approval.hidden = true;
+        if (!approved) {
+          setNodeState("review", "failed");
+          addTrace("review", "Draft rejected", "The workflow stopped without an ERP commit", "failed");
+        } else {
+          setNodeState("review", "complete");
+          addTrace("review", "Draft approved by Finance Ops", `Approval is bound to RUN-${String(runSequence).padStart(3, "0")} and the committed invoice state`, "complete");
+          setNodeState("sync", "complete");
+          addTrace("sync", "ERP draft synced", "Approved draft AP-2041 committed and owner notified", "complete");
+        }
+        const subtitle = app.querySelector("[data-run-subtitle]");
+        if (subtitle) subtitle.textContent = approved ? "Completed after accountable review" : "Stopped after rejection";
+        if (runButton instanceof HTMLButtonElement) runButton.disabled = false;
+        const runLabel = app.querySelector("[data-run-label]");
+        if (runLabel) runLabel.textContent = "Run again";
+      }
+
+      nodeButtons.forEach((button) => button.addEventListener("click", () => selectNode(button.getAttribute("data-node") || "extract")));
+      app.querySelectorAll("[data-mode-button]").forEach((button) => button.addEventListener("click", () => setMode(button.getAttribute("data-mode-button") || "build")));
+      app.querySelectorAll("[data-mobile-view]").forEach((button) => button.addEventListener("click", () => setMobileView(button.getAttribute("data-mobile-view") || "canvas")));
+      runButton?.addEventListener("click", runWorkflow);
+      app.querySelector("[data-clear-run]")?.addEventListener("click", resetRun);
+      app.querySelector("[data-approve]")?.addEventListener("click", () => completeApproval(true));
+      app.querySelector("[data-reject]")?.addEventListener("click", () => completeApproval(false));
+      app.querySelector("[data-retry]")?.addEventListener("click", () => {
+        if (recovery instanceof HTMLElement) recovery.hidden = true;
+        setNodeState("sync", "complete");
+        addTrace("sync", "Scoped ERP access restored", "Draft AP-2048 committed after a new permission check", "complete");
+        const subtitle = app.querySelector("[data-run-subtitle]");
+        if (subtitle) subtitle.textContent = "Recovered with scoped access";
+        if (runButton instanceof HTMLButtonElement) runButton.disabled = false;
+        const runLabel = app.querySelector("[data-run-label]");
+        if (runLabel) runLabel.textContent = "Run again";
+      });
+
+      if (scenarioSelect instanceof HTMLSelectElement) {
+        scenarioSelect.addEventListener("change", () => {
+          app.dataset.scenario = scenarioSelect.value;
+          const scenario = scenarios.find((item) => item.id === scenarioSelect.value);
+          const note = app.querySelector("[data-scenario-note]");
+          if (note) note.textContent = scenario?.note || "Synthetic scenario";
+          resetRun();
+        });
+      }
+
+      const threshold = app.querySelector("[data-threshold]");
+      threshold?.addEventListener("input", () => {
+        if (!(threshold instanceof HTMLInputElement)) return;
+        const thresholdValue = (Number(threshold.value) / 100).toFixed(2);
+        const output = app.querySelector("[data-threshold-value]");
+        const branchLabel = app.querySelector("[data-threshold-label]");
+        if (output) output.textContent = thresholdValue;
+        if (branchLabel) branchLabel.textContent = thresholdValue;
+        resetRun();
+      });
+
+      const stepName = app.querySelector<HTMLInputElement>("[data-step-name]");
+      stepName?.addEventListener("input", () => {
+        const fallback = nodes.find((node) => node.id === selectedNode)?.title || "Workflow step";
+        const nextTitle = stepName.value.trim() || fallback;
+        customTitles.set(selectedNode, nextTitle);
+        const inspectorTitle = app.querySelector("[data-inspector-title]");
+        const nodeTitle = app.querySelector(`[data-node="${selectedNode}"] .node-copy strong`);
+        if (inspectorTitle) inspectorTitle.textContent = nextTitle;
+        if (nodeTitle) nodeTitle.textContent = nextTitle;
+        resetRun();
+      });
+
+      const instruction = app.querySelector<HTMLTextAreaElement>("[data-instruction]");
+      instruction?.addEventListener("input", () => {
+        const count = app.querySelector("[data-instruction-count]");
+        if (count) count.textContent = `${instruction.value.length} / 500`;
+        resetRun();
+      });
+      app.querySelector("[data-failure-behavior]")?.addEventListener("change", resetRun);
+
+      const librarySearch = app.querySelector<HTMLInputElement>("[data-library-search]");
+      librarySearch?.addEventListener("input", () => {
+        const query = librarySearch.value.trim().toLowerCase();
+        app.querySelectorAll<HTMLElement>("[data-library-item]").forEach((item) => {
+          item.hidden = Boolean(query) && !item.textContent?.toLowerCase().includes(query);
+        });
+      });
+
+      resetRun();
+      selectNode(selectedNode);
+      setMobileView("canvas");
+    </script>
+  </body>
+</html>

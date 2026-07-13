@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.astro/
+.pages-preview/
+playwright-report/
+test-results/
+.DS_Store
+.context/

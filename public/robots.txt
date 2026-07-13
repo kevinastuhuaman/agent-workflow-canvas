@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://kevinastuhuaman.github.io/agent-workflow-canvas/sitemap.xml
