@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "name": "Agent Workflow Canvas",
+  "problem": "Enterprise teams need to understand, edit, and trust AI-assisted workflows before those workflows take consequential action.",
+  "users": ["operations teams", "product managers", "non-technical workflow owners"],
+  "productDecisions": [
+    "Show the workflow and execution trace in the same product surface.",
+    "Treat human approval as a stateful policy boundary, not a confirmation modal.",
+    "Invalidate progress after a permission failure and make recovery explicit.",
+    "Use deterministic synthetic scenarios so every state is inspectable."
+  ],
+  "capabilities": ["agent workflows", "human in the loop", "execution traces", "recovery", "permissions", "enterprise UX"],
+  "publicationMode": "open prototype",
+  "data": "synthetic",
+  "demo": "https://kevinastuhuaman.github.io/agent-workflow-canvas/",
+  "source": "https://github.com/kevinastuhuaman/agent-workflow-canvas"
+}
