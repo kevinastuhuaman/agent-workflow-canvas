@@ -107,7 +107,6 @@ a:focus-visible {
 .recovery-drawer > div,
 .statusbar,
 .library-footer,
-.select-button,
 .policy-callout {
   display: flex;
   align-items: center;
@@ -135,7 +134,7 @@ a:focus-visible {
 .approval-summary > span:last-child,
 .recovery-drawer span,
 .library-footer span,
-.select-button span {
+.policy-callout > span {
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -412,7 +411,6 @@ a:focus-visible {
 
 .library-item small,
 .library-footer small,
-.select-button small,
 .policy-callout small,
 .trace-empty small,
 .trace-list small,
@@ -435,7 +433,6 @@ a:focus-visible {
 }
 
 .library-footer strong,
-.select-button strong,
 .policy-callout strong,
 .approval-summary strong,
 .recovery-drawer strong,
@@ -808,19 +805,42 @@ a:focus-visible {
   accent-color: var(--green);
 }
 
-.select-button {
+.select-control {
+  position: relative;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 18px;
+  align-items: center;
   width: 100%;
   gap: 8px;
-  padding: 8px;
+  padding: 0 8px;
   border: 1px solid var(--line);
   border-radius: 5px;
   background: #f8faf9;
   color: var(--ink);
-  text-align: left;
 }
 
-.select-button > svg:last-child {
-  margin-left: auto;
+.select-control select {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  border: 0;
+  appearance: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.select-control > svg:last-child {
+  pointer-events: none;
+}
+
+.failure-help {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.4;
 }
 
 .policy-callout {
@@ -834,9 +854,6 @@ a:focus-visible {
 }
 
 .policy-callout > span {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
   gap: 2px;
 }
 

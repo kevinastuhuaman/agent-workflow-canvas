@@ -181,7 +181,6 @@ const description = "An interactive enterprise agent workflow builder with human
                   <button
                     type="button"
                     class={`workflow-node node-${node.kind}`}
-                    style={`--grid-area:${node.gridArea}`}
                     data-node={node.id}
                     data-state="idle"
                     aria-pressed={node.id === "extract" ? "true" : "false"}
@@ -226,8 +225,17 @@ const description = "An interactive enterprise agent workflow builder with human
           </div>
 
           <div class="inspector-section">
-            <span class="field-label">Failure behavior</span>
-            <button class="select-button" type="button"><RotateCcw size={15} /><span><strong>Retry, then route to review</strong><small>Two attempts with the same committed input</small></span><ChevronDown size={15} /></button>
+            <label class="field-label" for="failure-behavior">Failure behavior</label>
+            <div class="select-control">
+              <RotateCcw size={15} aria-hidden="true" />
+              <select id="failure-behavior" data-failure-behavior>
+                <option value="retry">Retry, then route to review</option>
+                <option value="review">Route to review immediately</option>
+                <option value="stop">Stop and notify the owner</option>
+              </select>
+              <ChevronDown size={15} aria-hidden="true" />
+            </div>
+            <small class="failure-help">The retry policy uses the same committed input.</small>
           </div>
 
           <div class="policy-callout">
@@ -531,6 +539,7 @@ const description = "An interactive enterprise agent workflow builder with human
       });
 
       app.querySelector("[data-instruction]")?.addEventListener("input", resetRun);
+      app.querySelector("[data-failure-behavior]")?.addEventListener("change", resetRun);
 
       const librarySearch = app.querySelector<HTMLInputElement>("[data-library-search]");
       librarySearch?.addEventListener("input", () => {

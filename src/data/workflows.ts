@@ -7,7 +7,6 @@ export type WorkflowNode = {
   description: string;
   kind: NodeKind;
   tool: string;
-  gridArea: string;
 };
 
 export const nodes: WorkflowNode[] = [
@@ -18,7 +17,6 @@ export const nodes: WorkflowNode[] = [
     description: "Starts when a new invoice PDF arrives in the finance inbox.",
     kind: "trigger",
     tool: "Inbox connector",
-    gridArea: "intake",
   },
   {
     id: "extract",
@@ -27,7 +25,6 @@ export const nodes: WorkflowNode[] = [
     description: "Reads the document and returns a typed invoice object with field evidence.",
     kind: "agent",
     tool: "Document model",
-    gridArea: "extract",
   },
   {
     id: "risk",
@@ -36,7 +33,6 @@ export const nodes: WorkflowNode[] = [
     description: "Checks totals, supplier identity, currency, and purchase-order coverage.",
     kind: "rule",
     tool: "Deterministic rules",
-    gridArea: "risk",
   },
   {
     id: "route",
@@ -45,7 +41,6 @@ export const nodes: WorkflowNode[] = [
     description: "High-confidence invoices continue. Exceptions move to accountable review.",
     kind: "branch",
     tool: "Confidence policy",
-    gridArea: "route",
   },
   {
     id: "post",
@@ -54,7 +49,6 @@ export const nodes: WorkflowNode[] = [
     description: "Creates a draft payable entry without releasing funds.",
     kind: "action",
     tool: "ERP connector",
-    gridArea: "post",
   },
   {
     id: "review",
@@ -63,7 +57,6 @@ export const nodes: WorkflowNode[] = [
     description: "Shows changed fields, evidence, and policy reasons before approval.",
     kind: "approval",
     tool: "Approval queue",
-    gridArea: "review",
   },
   {
     id: "sync",
@@ -72,7 +65,6 @@ export const nodes: WorkflowNode[] = [
     description: "Commits the approved draft and writes an auditable completion event.",
     kind: "action",
     tool: "ERP and Slack",
-    gridArea: "sync",
   },
 ];
 
